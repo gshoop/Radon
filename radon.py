@@ -34,16 +34,6 @@ def create_point_source_image(imsize,location,size):
     for i in np.arange(imsize):
         for j in np.arange(imsize):
             if i == location[0] and j == location[1]:
-                #img[i,j] = 255
-                #img[i-1,j-1] = 255
-                #img[i-1,j] = 255
-                #img[i,j-1] = 255
-                #img[i+1,j] = 255
-                #img[i+1,j+1] = 255
-                #img[i,j+1] = 255
-                #img[i-1,j+1] = 255
-                #img[i+1,j-1]= 255
-
                 img[i-size:i+size,j-size:j+size] = 255
     return img
 
@@ -90,8 +80,7 @@ def main():
     R = radon(img,theta)
     # Backprojection of image
     B = backproject(R,theta)
-
-    
+    # Show results
     display_result(img,R,B,theta,N)
 
 
