@@ -4,23 +4,29 @@ import sys
 import imutils
 import argparse
 from matplotlib import pyplot as plt
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
 from phantominator import shepp_logan
 
 def display_result(src,R,B,theta,N):
 
     fig,axs = plt.subplots(nrows=1,ncols=3,figsize=(12,4))
+    cmap = 'viridis'
+    normalizer = Normalize(0,255)
+    im = cm.ScalarMappable(norm=normalizer,cmap=cmap)
 
     axs[0].set_title("Source Image")
-    axs[0].imshow(src)
+    axs[0].imshow(src,cmap=cmap,norm=normalizer)
 
     axs[1].set_title("Sinogram")
-    axs[1].imshow(R,extent=[theta[0],theta[len(theta)-1],N,0])
+    axs[1].imshow(R,extent=[theta[0],theta[len(theta)-1],N,0],cmap=cmap,norm=normalizer)
     axs[1].set_aspect(0.8)
 
     axs[2].set_title("Back-projected Image")
-    axs[2].imshow(B,interpolation='none')
+    axs[2].imshow(B,interpolation='none',cmap=cmap,norm=normalizer)
 
     fig.suptitle("Radon Transform")
+    fig.colorbar(im, ax=axs.ravel().tolist())
     plt.show()
 
 def display(title,img,i):
@@ -84,8 +90,6 @@ def fourier_1D(R,theta):
 
     rows,cols = Rfft.shape
 
-
-
     plt.figure(1)
     plt.imshow(np.imag(Rfft),extent=[theta[0],theta[len(theta)-1],rows,0])
     plt.show()
@@ -98,6 +102,7 @@ def shepp_logan_radon(sl):
     theta = np.linspace(0,2*np.pi,steps)*180/np.pi
 
     M0 = shepp_logan((N,N,1),MR=False, zlims=(-.25,.25))
+    M0 = np.round((M0-np.min(M0))/np.ptp(M0)*255)
     R = radon(M0,theta,sl)
     #Rfft = fourier_1D(R,theta)
     B = backproject(R,theta)
@@ -126,7 +131,6 @@ def main(arg1,sl):
         R = radon(img,theta,sl)
         # Backprojection of image
         B = backproject(R,theta)
-        f = B.flatten()
 
         # Display results
         display_result(img,R,B,theta,N)
