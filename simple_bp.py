@@ -71,6 +71,20 @@ def backproject(R,theta):
     
     return B
 
+def fourier_1D(R,theta):
+
+    Rfft = np.fft.fft(R,axis=0)
+
+    rows,cols = Rfft.shape
+
+
+
+    plt.figure(1)
+    plt.imshow(np.imag(Rfft),extent=[theta[0],theta[len(theta)-1],rows,0])
+    plt.show()
+
+    return Rfft
+
 def shepp_logan_radon(sl):
     N = 256
     steps = 100
@@ -78,6 +92,7 @@ def shepp_logan_radon(sl):
 
     M0 = shepp_logan((N,N,1),MR=False, zlims=(-.25,.25))
     R = radon(M0,theta,sl)
+    #Rfft = fourier_1D(R,theta)
     B = backproject(R,theta)
     display_result(M0,R,B,theta,N)
 
