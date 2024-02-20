@@ -34,11 +34,15 @@ def print_shape(img):
 
 def create_point_source_image(imsize,location,size):
     img = np.zeros([imsize,imsize],dtype=np.uint8)
+    basis = np.zeros([imsize,imsize],dtype=np.float64)
+    pixel_value = 255
+
     for i in np.arange(imsize):
         for j in np.arange(imsize):
             if i == location[0] and j == location[1]:
-                img[i-size:i+size,j-size:j+size] = 255
-    return img
+                img[i-size:i+size,j-size:j+size] = pixel_value
+                basis[i-size:i+size,j-size:j+size] = 1.0
+    return img,basis
 
 def radon(img,theta,sl):
 
@@ -54,6 +58,7 @@ def radon(img,theta,sl):
         for column in np.arange(cols):
             R[column,angle] = np.sum(img_rot[:,column])
 
+    R = np.round((R-np.min(R))/np.ptp(R)*255)
     return R
 
 def backproject(R,theta):
@@ -68,6 +73,8 @@ def backproject(R,theta):
         
         B_rot = imutils.rotate(B_rot,-1*theta[angle])
         B += B_rot
+
+    B = np.round((B-np.min(B)))/np.ptp(B)*255
     
     return B
 
@@ -113,11 +120,14 @@ def main(arg1,sl):
         diameter = arg1['source'][2]
 
         # Source image creation
-        img = create_point_source_image(N,loc,diameter)
+        img,basis = create_point_source_image(N,loc,diameter)
+        b = basis.flatten()
         # Radon transform of image
         R = radon(img,theta,sl)
         # Backprojection of image
         B = backproject(R,theta)
+        f = B.flatten()
+
         # Display results
         display_result(img,R,B,theta,N)
         
